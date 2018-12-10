@@ -14,7 +14,8 @@ const double sigma = 0.01;						//Stdev of change after mutation
 const int n = 1000;								//Population size
 const int nPopulations = 3;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
-const int nGenerations = 100;					//Number of generations
+const int nGenerations = 10000;					//Number of generations
+const int nGenSav = 100;						//Save every n generations
 const vector<double> Pc = {0.95, 0.05, 0.67};	//Initial mean tendency of populations to cooperate
 
 
@@ -42,9 +43,6 @@ int main()
 		if (nPopulations != Pc.size()) {
 			throw logic_error("Number of populations and number of initial mean Pc values are different\n");
 		}
-		if (nPopulations != Pcsigma.size()) {
-			throw logic_error("Number of populations and number of initial Pc stdevs are different\n");
-		}
 
 		//Initialise population
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
@@ -71,8 +69,10 @@ int main()
 
 		//Simulate
 		for (int g = 1; g <= nGenerations; ++g) {
-			cout << g;
-			ofs << g;
+			if (g % nGenSav == 0) {
+				cout << g;
+				ofs << g;
+			}
 			for (int nPop = 0; nPop < nPopulations; ++nPop) {
 
 				//Interactions
@@ -123,26 +123,30 @@ int main()
 				}
 				Populations[nPop] = PopulationNew;
 
-				//Calculate mean Pc
-				double mean = 0.0;
-				for (int i = 0; i < n; ++i) {
-					mean += Populations[nPop][i].strategy;
-				}
-				mean /= n;
+				if (g % nGenSav == 0) {
+					//Calculate mean Pc
+					double mean = 0.0;
+					for (int i = 0; i < n; ++i) {
+						mean += Populations[nPop][i].strategy;
+					}
+					mean /= n;
 
-				//Calculate stdev of Pc
-				double stdev = 0.0;
-				for (int i = 0; i < n; ++i) {
-					stdev += pow(Populations[nPop][i].strategy - mean, 2);
-				}
-				stdev = sqrt(stdev / n);
+					//Calculate stdev of Pc
+					double stdev = 0.0;
+					for (int i = 0; i < n; ++i) {
+						stdev += pow(Populations[nPop][i].strategy - mean, 2);
+					}
+					stdev = sqrt(stdev / n);
 
-				//Output
-				cout << "\t" << mean << "\t" << stdev;
-				ofs << "\t" << mean << "\t" << stdev;
+					//Output
+					cout << "\t" << mean << "\t" << stdev;
+					ofs << "\t" << mean << "\t" << stdev;
+				}
 			}
-			cout << "\n";
-			ofs << "\n";
+			if (g % nGenSav == 0) {
+				cout << "\n";
+				ofs << "\n";
+			}
 		}
 		ofs.close();
 	}
