@@ -12,11 +12,10 @@ const double c = 2.0;							//Costs
 const double mu = 0.01;							//Mutation rate
 const double sigma = 0.01;						//Stdev of change after mutation
 const int n = 1000;								//Population size
-const int nPopulations = 2;						//Number of populations
+const int nPopulations = 3;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
 const int nGenerations = 100;					//Number of generations
-const vector<double> Pc = {0.95, 0.05};			//Initial mean tendency of populations to cooperate
-const vector<double> Pcsigma = {0.3, 0.3};		//Initial stdev of Pc
+const vector<double> Pc = {0.95, 0.05, 0.67};	//Initial mean tendency of populations to cooperate
 
 
 mt19937_64 rng;
@@ -52,18 +51,10 @@ int main()
 		cout << "0";
 		ofs << "0";
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
-			normal_distribution<double> chooseInitialPc(Pc[nPop], Pcsigma[nPop]);
 			double mean = 0.0;
 			for (int i = 0; i < n; ++i) {
 				Populations[nPop][i].fitness = 0.0;
-				Populations[nPop][i].strategy = chooseInitialPc(rng);
-				if (Populations[nPop][i].strategy < 0.0) {
-					Populations[nPop][i].strategy = 0.0;
-				}
-				else if (Populations[nPop][i].strategy > 1.0) {
-					Populations[nPop][i].strategy = 1.0;
-				}
-
+				Populations[nPop][i].strategy = Pc[nPop];
 				mean += Populations[nPop][i].strategy;
 			}
 			mean /= n;
