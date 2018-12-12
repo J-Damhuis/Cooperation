@@ -49,9 +49,7 @@ int main()
 			for (int i = 0; i < n; ++i) {
 				Populations[nPop][i].fitness = 0.0;
 				Populations[nPop][i].strategy = i < n * Pc[nPop] ? 1 : 0;
-				if (Populations[nPop][i].strategy == 1) {
-					mean += 1.0;
-				}
+				mean += Populations[nPop][i].strategy;
 			}
 			cout << "\t" << mean / n;
 			ofs << "\t" << mean / n;
