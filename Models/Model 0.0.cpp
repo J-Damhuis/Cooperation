@@ -6,14 +6,14 @@
 
 using namespace std;
 
-const double b = 4.0;						//Benefits
-const double c = 2.0;						//Costs
-const double mu = 0.01;						//Mutation rate
-const int n = 1000;							//Population size
-const int nPopulations = 2;					//Number of populations
-const int nInteractions = 10;				//Number of interactions in individual's life
-const int nGenerations = 100;				//Number of generation
-const vector<double> Pc = {0.95, 0.05};		//Initial fractions of populations that cooperates
+const double b = 4.0;							//Benefits
+const double c = 2.0;							//Costs
+const double mu = 0.01;							//Mutation rate
+const int n = 1000;								//Population size
+const int nPopulations = 3;						//Number of populations
+const int nInteractions = 10;					//Number of interactions in individual's life
+const int nGenerations = 100;					//Number of generation
+const vector<double> Pc = {0.95, 0.05, 0.67};	//Initial fractions of populations that cooperates
 
 mt19937_64 rng;
 
