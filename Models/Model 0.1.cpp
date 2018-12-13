@@ -68,6 +68,8 @@ int main()
 		ofs << "\n";
 
 		//Simulate
+		uniform_real_distribution<double> chooseFraction(0.0, 1.0);
+		uniform_int_distribution<int> pickPartner(0, n - 1);
 		for (int g = 1; g <= nGenerations; ++g) {
 			if (g % nGenSav == 0) {
 				cout << g;
@@ -78,11 +80,9 @@ int main()
 				//Interactions
 				for (int i = 0; i < n; ++i) {
 					for (int k = 0; k < nInteractions; ++k) {
-						uniform_real_distribution<double> choosePc(0.0, 1.0);
-						uniform_int_distribution<int> pickPartner(0, n - 1);
 						int j = pickPartner(rng);
-						double r = choosePc(rng);
-						double s = choosePc(rng);
+						double r = chooseFraction(rng);
+						double s = chooseFraction(rng);
 						if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy > s) {		//Both cooperate
 							Populations[nPop][i].fitness += b - c / 2;
 						}
@@ -105,12 +105,10 @@ int main()
 				}
 				vector<Individual> PopulationNew(n);
 				discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
-				vector<double> vecMutation = { mu, 1 - mu };
-				discrete_distribution<int> chooseMutation(vecMutation.begin(), vecMutation.end());
 				for (int i = 0; i < n; ++i) {
 					PopulationNew[i] = Populations[nPop][chooseParent(rng)];
 					PopulationNew[i].fitness = 0.0;
-					if (chooseMutation(rng) == 0) {
+					if (chooseFraction(rng) < mu) {
 						normal_distribution<double> defineMutation(0.0, sigma);
 						PopulationNew[i].strategy += defineMutation(rng);
 						if (PopulationNew[i].strategy < 0.0) {

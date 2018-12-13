@@ -58,6 +58,8 @@ int main()
 		ofs << "\n";
 
 		//Simulate
+		uniform_int_distribution<int> pickPartner(0, n - 1);
+		uniform_real_distribution<double> chooseFraction(0.0, 1.0);
 		for (int g = 1; g <= nGenerations; ++g) {
 			cout << g;
 			ofs << g;
@@ -66,7 +68,6 @@ int main()
 				//Interactions
 				for (int i = 0; i < n; ++i) {
 					for (int k = 0; k < nInteractions; ++k) {
-						uniform_int_distribution<int> pickPartner(0, n - 1);
 						int j = pickPartner(rng);
 						if (Populations[nPop][i].strategy == 1 && Populations[nPop][j].strategy == 1) {			//Both cooperate
 							Populations[nPop][i].fitness += b - c / 2;
@@ -90,12 +91,10 @@ int main()
 				}
 				vector<Individual> PopulationNew(n);
 				discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
-				vector<double> vecMutation = { mu, 1 - mu };
-				discrete_distribution<int> chooseMutation(vecMutation.begin(), vecMutation.end());
 				for (int i = 0; i < n; ++i) {
 					PopulationNew[i] = Populations[nPop][chooseParent(rng)];
 					PopulationNew[i].fitness = 0.0;
-					if (chooseMutation(rng) == 0) {
+					if (chooseFraction(rng) < mu) {
 						PopulationNew[i].strategy = PopulationNew[i].strategy == 1 ? 0 : 1;
 					}
 				}

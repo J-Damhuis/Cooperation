@@ -36,7 +36,7 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 1.0.csv");
+		ofstream ofs("Model 1.1.csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
 		}
@@ -50,7 +50,7 @@ int main()
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
 		cout << "0";
 		ofs << "0";
-		double pmean;
+		vector<double> pmean(nPopulations);
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0, info = 0.0;
 			for (int i = 0; i < n; ++i) {
@@ -61,22 +61,21 @@ int main()
 				info += Populations[nPop][i].info;
 			}
 			mean /= n;
-			pmean = mean;
+			pmean[nPop] = mean;
 			info /= n;
 			double stdev = 0.0;
 			for (int i = 0; i < n; ++i) {
 				stdev += pow(Populations[nPop][i].strategy - mean, 2);
 			}
 			stdev = sqrt(stdev / n);
-			cout << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
-			ofs << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
+			cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
+			ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
 		}
 		cout << "\n";
 		ofs << "\n";
 
 		//Simulate
 		for (int g = 1; g <= nGenerations; ++g) {
-			double coop = 0.0;
 			if (g % nGenSav == 0) {
 				cout << g;
 				ofs << g;
@@ -84,6 +83,7 @@ int main()
 			for (int nPop = 0; nPop < nPopulations; ++nPop) {
 
 				//Interactions
+				double coop = 0.0;
 				for (int i = 0; i < n; ++i) {
 					for (int k = 0; k < nInteractions; ++k) {
 						uniform_real_distribution<double> choosePc(0.0, 1.0);
@@ -110,18 +110,18 @@ int main()
 								}
 							}
 							else if (Populations[nPop][j].info == 1) {												//If partner does obtain info
-								if (pmean > r && Populations[nPop][j].strategy > s) {								//Both cooperate
+								if (pmean[nPop] > r && Populations[nPop][j].strategy > s) {								//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
 								}
-								else if (pmean > r && Populations[nPop][j].strategy < s) {							//Only focal individual cooperates
+								else if (pmean[nPop] > r && Populations[nPop][j].strategy < s) {							//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 								}
-								else if (pmean < r && Populations[nPop][j].strategy > s) {							//Only focal individual defects
+								else if (pmean[nPop] < r && Populations[nPop][j].strategy > s) {							//Only focal individual defects
 									Populations[nPop][i].fitness += b;
 								}
-								else if (pmean < r && Populations[nPop][j].strategy < s) {							//Both defect
+								else if (pmean[nPop] < r && Populations[nPop][j].strategy < s) {							//Both defect
 									Populations[nPop][i].fitness += 0.0;
 								}
 							}
@@ -144,12 +144,12 @@ int main()
 						}
 					}
 				}
-				pmean = coop / (nInteractions * n);
+				pmean[nPop] = coop / (nInteractions * n);
 
 				//Determine offspring
 				vector<double> vecWeights(n);
 				for (int i = 0; i < n; ++i) {
-					vecWeights[i] = Populations[nPop][i].fitness;
+					vecWeights[i] = Populations[nPop][i].fitness < 0.0 ? 0.0 : Populations[nPop][i].fitness;
 				}
 				vector<Individual> PopulationNew(n);
 				discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
@@ -192,8 +192,8 @@ int main()
 					stdev = sqrt(stdev / n);
 
 					//Output
-					cout << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
-					ofs << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
+					cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
+					ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
 				}
 			}
 			if (g % nGenSav == 0) {
