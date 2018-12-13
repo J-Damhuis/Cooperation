@@ -50,6 +50,7 @@ int main()
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
 		cout << "0";
 		ofs << "0";
+		double pmean;
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0, info = 0.0;
 			for (int i = 0; i < n; ++i) {
@@ -60,14 +61,15 @@ int main()
 				info += Populations[nPop][i].info;
 			}
 			mean /= n;
+			pmean = mean;
 			info /= n;
 			double stdev = 0.0;
 			for (int i = 0; i < n; ++i) {
 				stdev += pow(Populations[nPop][i].strategy - mean, 2);
 			}
 			stdev = sqrt(stdev / n);
-			cout << "\t" << mean << "\t" << mean << "\t" << stdev << "\t" << info;
-			ofs << "\t" << mean << "\t" << mean << "\t" << stdev << "\t" << info;
+			cout << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
+			ofs << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
 		}
 		cout << "\n";
 		ofs << "\n";
@@ -89,29 +91,44 @@ int main()
 						int j = pickPartner(rng);
 						double r = choosePc(rng);
 						double s = choosePc(rng);
-						if (Populations[nPop][i].info) {
+						if (Populations[nPop][i].info == 1) {														//If focal individual obtains info
 							Populations[nPop][i].fitness -= price;
-							if (Populations[nPop][j].strategy > r) {											//If partner cooperated last time
-								if (Populations[nPop][j].strategy > s) {										//Only focal individual defects
+							if (Populations[nPop][j].info == 0) {													//If partner does not obtain info
+								if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy > s) {		//Only focal individual defects
 									Populations[nPop][i].fitness += b;
 								}
-								else {																			//Both defect
-									Populations[nPop][i].fitness += 0;
+								else if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy < s) {	//Both defect
+									Populations[nPop][i].fitness += 0.0;
+								}
+								else if (Populations[nPop][j].strategy < r && Populations[nPop][j].strategy > s) {	//Both cooperate
+									coop += 1.0;
+									Populations[nPop][i].fitness += b - c / 2.0;
+								}
+								else if (Populations[nPop][j].strategy < r && Populations[nPop][j].strategy < s) {	//Only focal individual cooperates
+									Populations[nPop][i].fitness += b - c;
+									coop += 1.0;
 								}
 							}
-							else {																				//If partner defected last time
-								coop += 1.0;
-								if (Populations[nPop][j].strategy > s) {										//Both cooperate
-									Populations[nPop][i].fitness += b - c / 2;
+							else if (Populations[nPop][j].info == 1) {												//If partner does obtain info
+								if (pmean > r && Populations[nPop][j].strategy > s) {								//Both cooperate
+									Populations[nPop][i].fitness += b - c / 2.0;
+									coop += 1.0;
 								}
-								else {																			//Only focal individual cooperates
+								else if (pmean > r && Populations[nPop][j].strategy < s) {							//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
+									coop += 1.0;
+								}
+								else if (pmean < r && Populations[nPop][j].strategy > s) {							//Only focal individual defects
+									Populations[nPop][i].fitness += b;
+								}
+								else if (pmean < r && Populations[nPop][j].strategy < s) {							//Both defect
+									Populations[nPop][i].fitness += 0.0;
 								}
 							}
 						}
-						else {
+						else {																					//If focal individual does not obtain info
 							if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy > s) {		//Both cooperate
-								Populations[nPop][i].fitness += b - c / 2;
+								Populations[nPop][i].fitness += b - c / 2.0;
 								coop += 1.0;
 							}
 							else if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy < s) {	//Only focal individual cooperates
@@ -122,12 +139,12 @@ int main()
 								Populations[nPop][i].fitness += b;
 							}
 							else if (Populations[nPop][i].strategy < r && Populations[nPop][j].strategy < s) {	//Both defect
-								Populations[nPop][i].fitness += 0;
+								Populations[nPop][i].fitness += 0.0;
 							}
 						}
 					}
 				}
-				coop /= nInteractions * n;
+				pmean = coop / (nInteractions * n);
 
 				//Determine offspring
 				vector<double> vecWeights(n);
@@ -175,8 +192,8 @@ int main()
 					stdev = sqrt(stdev / n);
 
 					//Output
-					cout << "\t" << coop << "\t" << mean << "\t" << stdev << "\t" << info;
-					ofs << "\t" << coop << "\t" << mean << "\t" << stdev << "\t" << info;
+					cout << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
+					ofs << "\t" << pmean << "\t" << mean << "\t" << stdev << "\t" << info;
 				}
 			}
 			if (g % nGenSav == 0) {
