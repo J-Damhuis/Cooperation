@@ -45,6 +45,9 @@ int main()
 		if (nPopulations != Pc.size()) {
 			throw logic_error("Number of populations and number of initial mean Pc values are different\n");
 		}
+		if (nPopulations != Pi.size()) {
+			throw logic_error("Number of populations and number of initial mean Pi values are different\n");
+		}
 
 		//Initialise population
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
