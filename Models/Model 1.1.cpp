@@ -75,6 +75,8 @@ int main()
 		ofs << "\n";
 
 		//Simulate
+		uniform_real_distribution<double> chooseFraction(0.0, 1.0);
+		uniform_int_distribution<int> pickPartner(0, n - 1);
 		for (int g = 1; g <= nGenerations; ++g) {
 			if (g % nGenSav == 0) {
 				cout << g;
@@ -86,11 +88,9 @@ int main()
 				double coop = 0.0;
 				for (int i = 0; i < n; ++i) {
 					for (int k = 0; k < nInteractions; ++k) {
-						uniform_real_distribution<double> choosePc(0.0, 1.0);
-						uniform_int_distribution<int> pickPartner(0, n - 1);
 						int j = pickPartner(rng);
-						double r = choosePc(rng);
-						double s = choosePc(rng);
+						double r = chooseFraction(rng);
+						double s = chooseFraction(rng);
 						if (Populations[nPop][i].info == 1) {														//If focal individual obtains info
 							Populations[nPop][i].fitness -= price;
 							if (Populations[nPop][j].info == 0) {													//If partner does not obtain info
@@ -126,7 +126,7 @@ int main()
 								}
 							}
 						}
-						else {																					//If focal individual does not obtain info
+						else if (Populations[nPop][i].info == 0) {						 						//If focal individual does not obtain info
 							if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy > s) {		//Both cooperate
 								Populations[nPop][i].fitness += b - c / 2.0;
 								coop += 1.0;
@@ -153,12 +153,10 @@ int main()
 				}
 				vector<Individual> PopulationNew(n);
 				discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
-				vector<double> vecMutation = { mu, 1 - mu };
-				discrete_distribution<int> chooseMutation(vecMutation.begin(), vecMutation.end());
 				for (int i = 0; i < n; ++i) {
 					PopulationNew[i] = Populations[nPop][chooseParent(rng)];
 					PopulationNew[i].fitness = 0.0;
-					if (chooseMutation(rng) == 0) {
+					if (chooseFraction(rng) < mu) {
 						normal_distribution<double> defineMutation(0.0, sigma);
 						PopulationNew[i].strategy += defineMutation(rng);
 						if (PopulationNew[i].strategy < 0.0) {
@@ -168,7 +166,7 @@ int main()
 							PopulationNew[i].strategy = 1.0;
 						}
 					}
-					if (chooseMutation(rng) == 0) {
+					if (chooseFraction(rng) < mu) {
 						PopulationNew[i].info = PopulationNew[i].info == 1 ? 0 : 1;
 					}
 				}
