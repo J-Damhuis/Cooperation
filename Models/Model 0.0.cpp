@@ -42,8 +42,14 @@ int main()
 
 		//Initialise populations and output initial state
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
-		cout << "0";
-		ofs << "0";
+		cout << "Generation";
+		ofs << "Generation";
+		for (int nPop = 0; nPop < nPopulations; ++nPop) {
+			cout << "\tMeanP0";
+			ofs << "\tMeanP0";
+		}
+		cout << "\n0";
+		ofs << "\n0";
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0;
 			for (int i = 0; i < n; ++i) {

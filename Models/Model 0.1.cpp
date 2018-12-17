@@ -56,8 +56,14 @@ int main()
 
 		//Initialise population
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
-		cout << "0";
-		ofs << "0";
+		cout << "Generation";
+		ofs << "Generation";
+		for (int nPop = 0; nPop < nPopulations; ++nPop) {
+			cout << "\tMeanP0\tStdevP0";
+			ofs << "\tMeanP0\tStdevP0";
+		}
+		cout << "\n0";
+		ofs << "\n0";
 		spread[0] << "0";
 		spread[1] << "0";
 		spread[2] << "0";
