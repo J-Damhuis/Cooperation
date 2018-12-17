@@ -36,7 +36,7 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 1.1.csv");
+		ofstream ofs("Model 1.2.csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
 		}
@@ -54,8 +54,8 @@ int main()
 		cout << "Generation";
 		ofs << "Generation";
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
-			cout << "\tPmean\tMeanP0\tStdevP0\tMeanInfo";
-			ofs << "\tPmean\tMeanP0\tStdevP0\tMeanInfo";
+			cout << "\tPmean\tMeanP0\tStdevP0\tMeanInfo\tStdevInfo";
+			ofs << "\tPmean\tMeanP0\tStdevP0\tMeanInfo\tStdevInfo";
 		}
 		cout << "\n0";
 		ofs << "\n0";
@@ -65,20 +65,22 @@ int main()
 			for (int i = 0; i < n; ++i) {
 				Populations[nPop][i].fitness = 0.0;
 				Populations[nPop][i].strategy = Pc[nPop];
-				Populations[nPop][i].info = i < n * Pi[nPop] ? 1 : 0;
+				Populations[nPop][i].info = Pi[nPop];
 				mean += Populations[nPop][i].strategy;
 				info += Populations[nPop][i].info;
 			}
 			mean /= n;
 			pmean[nPop] = mean;
 			info /= n;
-			double stdev = 0.0;
+			double stdevMean = 0.0, stdevInfo = 0.0;
 			for (int i = 0; i < n; ++i) {
-				stdev += pow(Populations[nPop][i].strategy - mean, 2);
+				stdevMean += pow(Populations[nPop][i].strategy - mean, 2);
+				stdevInfo += pow(Populations[nPop][i].info - info, 2);
 			}
-			stdev = sqrt(stdev / n);
-			cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
-			ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
+			stdevMean = sqrt(stdevMean / n);
+			stdevInfo = sqrt(stdevInfo / n);
+			cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdevMean << "\t" << info << "\t" << stdevInfo;
+			ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdevMean << "\t" << info << "\t" << stdevInfo;
 		}
 		cout << "\n";
 		ofs << "\n";
@@ -98,11 +100,13 @@ int main()
 				for (int i = 0; i < n; ++i) {
 					for (int k = 0; k < nInteractions; ++k) {
 						int j = pickPartner(rng);
+						double p = chooseFraction(rng);
+						double q = chooseFraction(rng);
 						double r = chooseFraction(rng);
 						double s = chooseFraction(rng);
-						if (Populations[nPop][i].info == 1) {														//If focal individual obtains info
+						if (Populations[nPop][i].info > p) {														//If focal individual obtains info
 							Populations[nPop][i].fitness -= price;
-							if (Populations[nPop][j].info == 0) {													//If partner does not obtain info
+							if (Populations[nPop][j].info < q) {													//If partner does not obtain info
 								if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy > s) {		//Only focal individual defects
 									Populations[nPop][i].fitness += b;
 								}
@@ -118,25 +122,25 @@ int main()
 									coop += 1.0;
 								}
 							}
-							else if (Populations[nPop][j].info == 1) {												//If partner does obtain info
-								if (pmean[nPop] > r && pmean[nPop] > s) {											//Both cooperate
+							else if (Populations[nPop][j].info > q) {												//If partner does obtain info
+								if (pmean[nPop] > r && Populations[nPop][j].strategy > s) {								//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
 								}
-								else if (pmean[nPop] > r && pmean[nPop] < s) {										//Only focal individual cooperates
+								else if (pmean[nPop] > r && Populations[nPop][j].strategy < s) {							//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 								}
-								else if (pmean[nPop] < r && pmean[nPop] > s) {										//Only focal individual defects
+								else if (pmean[nPop] < r && Populations[nPop][j].strategy > s) {							//Only focal individual defects
 									Populations[nPop][i].fitness += b;
 								}
-								else if (pmean[nPop] < r && pmean[nPop] < s) {										//Both defect
+								else if (pmean[nPop] < r && Populations[nPop][j].strategy < s) {							//Both defect
 									Populations[nPop][i].fitness += 0.0;
 								}
 							}
 						}
-						else if (Populations[nPop][i].info == 0) {						 							//If focal individual does not obtain info
-							if (Populations[nPop][j].info == 0) {													//If partner does not obtain info
+						else if (Populations[nPop][i].info < p) {						 							//If focal individual does not obtain info
+							if (Populations[nPop][j].info < q) {													//If partner does not obtain info
 								if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy > s) {		//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
@@ -152,7 +156,7 @@ int main()
 									Populations[nPop][i].fitness += 0.0;
 								}
 							}
-							else if (Populations[nPop][j].info == 1) {												//If partner obtains info
+							else if (Populations[nPop][j].info > q) {												//If partner obtains info
 								if (Populations[nPop][i].info > r && Populations[nPop][i].info > s) {				//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
@@ -183,8 +187,8 @@ int main()
 				for (int i = 0; i < n; ++i) {
 					PopulationNew[i] = Populations[nPop][chooseParent(rng)];
 					PopulationNew[i].fitness = 0.0;
+					normal_distribution<double> defineMutation(0.0, sigma);
 					if (chooseFraction(rng) < mu) {
-						normal_distribution<double> defineMutation(0.0, sigma);
 						PopulationNew[i].strategy += defineMutation(rng);
 						if (PopulationNew[i].strategy < 0.0) {
 							PopulationNew[i].strategy = 0.0;
@@ -194,7 +198,13 @@ int main()
 						}
 					}
 					if (chooseFraction(rng) < mu) {
-						PopulationNew[i].info = PopulationNew[i].info == 1 ? 0 : 1;
+						PopulationNew[i].info += defineMutation(rng);
+						if (PopulationNew[i].info < 0.0) {
+							PopulationNew[i].info = 0.0;
+						}
+						else if (PopulationNew[i].info > 1.0) {
+							PopulationNew[i].info = 1.0;
+						}
 					}
 				}
 				Populations[nPop] = PopulationNew;
@@ -209,16 +219,18 @@ int main()
 					mean /= n;
 					info /= n;
 
-					//Calculate stdev of Pc
-					double stdev = 0.0;
+					//Calculate stdevs
+					double stdevMean = 0.0, stdevInfo = 0.0;
 					for (int i = 0; i < n; ++i) {
-						stdev += pow(Populations[nPop][i].strategy - mean, 2);
+						stdevMean += pow(Populations[nPop][i].strategy - mean, 2);
+						stdevInfo += pow(Populations[nPop][i].info - info, 2);
 					}
-					stdev = sqrt(stdev / n);
+					stdevMean = sqrt(stdevMean / n);
+					stdevInfo = sqrt(stdevInfo / n);
 
 					//Output
-					cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
-					ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
+					cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdevMean << "\t" << info << "\t" << stdevInfo;
+					ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdevMean << "\t" << info << "\t" << stdevInfo;
 				}
 			}
 			if (g % nGenSav == 0) {
