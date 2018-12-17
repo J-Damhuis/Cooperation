@@ -14,8 +14,8 @@ const double sigma = 0.01;						//Stdev of change after mutation
 const int n = 1000;								//Population size
 const int nPopulations = 3;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
-const int nGenerations = 10000;					//Number of generations
-const int nGenSav = 100;						//Save every n generations
+const int nGenerations = 100;					//Number of generations
+const int nGenSav = 1;							//Save every n generations
 const vector<double> Pc = {0.95, 0.05, 0.67};	//Initial mean tendency of populations to cooperate
 
 
@@ -34,9 +34,19 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 0.1.csv");
+		ofstream ofs("Model 0.1 .csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
+		}
+
+		//open outout files spread graph
+		ofstream spread1("spread_graph_0.95.csv"), spread2("spread_graph_0.05.csv"), spread3("spread_graph_0.67.csv");
+		vector<ofstream> spread;
+		spread.push_back(move(spread1));
+		spread.push_back(move(spread2));
+		spread.push_back(move(spread3));
+		if (!spread[0].is_open() || !spread[1].is_open() || !spread[2].is_open()) {
+			throw logic_error("Unable to open one of the spread files\n");
 		}
 
 		//More checks
@@ -48,12 +58,17 @@ int main()
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
 		cout << "0";
 		ofs << "0";
+		spread[0] << "0";
+		spread[1] << "0";
+		spread[2] << "0";
+
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0;
 			for (int i = 0; i < n; ++i) {
 				Populations[nPop][i].fitness = 0.0;
 				Populations[nPop][i].strategy = Pc[nPop];
 				mean += Populations[nPop][i].strategy;
+				spread[nPop] << '\t' << Populations[nPop][i].strategy;
 			}
 			mean /= n;
 			double stdev = 0.0;
@@ -66,6 +81,9 @@ int main()
 		}
 		cout << "\n";
 		ofs << "\n";
+		spread[0] << "\n";
+		spread[1] << "\n";
+		spread[2] << "\n";
 
 		//Simulate
 		uniform_real_distribution<double> chooseFraction(0.0, 1.0);
@@ -74,6 +92,9 @@ int main()
 			if (g % nGenSav == 0) {
 				cout << g;
 				ofs << g;
+				spread[0] << g;
+				spread[1] << g;
+				spread[2] << g;
 			}
 			for (int nPop = 0; nPop < nPopulations; ++nPop) {
 
@@ -138,7 +159,11 @@ int main()
 
 					//Output
 					cout << "\t" << mean << "\t" << stdev;
-					ofs << "\t" << mean << "\t" << stdev;
+					ofs << "\t" << mean << "\t" << stdev;	
+					for (int i = 0; i < n; ++i) {
+						spread[nPop] << "\t" << Populations[nPop][i].strategy;
+					}
+					spread[nPop] << "\n";
 				}
 			}
 			if (g % nGenSav == 0) {
