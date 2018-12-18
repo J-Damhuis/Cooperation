@@ -40,6 +40,22 @@ int main()
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
 		}
+		ofstream spread1("spread_model1.2_0.95.csv"), spread2("spread_model1.2_0.05.csv"), spread3("spread_model1.2_0.67.csv");
+		vector<ofstream> spread;
+		spread.push_back(move(spread1));
+		spread.push_back(move(spread2));
+		spread.push_back(move(spread3));
+		if (!spread[0].is_open() || !spread[1].is_open() || !spread[2].is_open()) {
+			throw logic_error("Unable to open one of the spread file \n");
+		}
+		ofstream info1("infospread_model1.2_0.95.csv"), info2("infospread_model1.2_0.05.csv"), info3("infospread_model1.2_0.67.csv");
+		vector<ofstream> infospread;
+		infospread.push_back(move(info1));
+		infospread.push_back(move(info2));
+		infospread.push_back(move(info3));
+		if (!infospread[0].is_open() || !infospread[1].is_open() || !infospread[2].is_open()) {
+			throw logic_error("Unable to open one of the infospread file \n");
+		}
 
 		//More checks
 		if (nPopulations != Pc.size()) {
@@ -59,6 +75,12 @@ int main()
 		}
 		cout << "\n0";
 		ofs << "\n0";
+		spread[0] << "0";
+		spread[1] << "0";
+		spread[2] << "0";
+		infospread[0] << "0";
+		infospread[1] << "0";
+		infospread[2] << "0";
 		vector<double> pmean(nPopulations);
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0, info = 0.0;
@@ -68,6 +90,8 @@ int main()
 				Populations[nPop][i].info = Pi[nPop];
 				mean += Populations[nPop][i].strategy;
 				info += Populations[nPop][i].info;
+				spread[nPop] << "\t" << Populations[nPop][i].strategy;
+				infospread[nPop] << "\t" << Populations[nPop][i].info;
 			}
 			mean /= n;
 			pmean[nPop] = mean;
@@ -84,6 +108,12 @@ int main()
 		}
 		cout << "\n";
 		ofs << "\n";
+		spread[0] << "\n";
+		spread[1] << "\n";
+		spread[2] << "\n";
+		infospread[0] << "\n";
+		infospread[1] << "\n";
+		infospread[2] << "\n";
 
 		//Simulate
 		uniform_real_distribution<double> chooseFraction(0.0, 1.0);
@@ -92,6 +122,12 @@ int main()
 			if (g % nGenSav == 0) {
 				cout << g;
 				ofs << g;
+				spread[0] << g;
+				spread[1] << g;
+				spread[2] << g;
+				infospread[0] << g;
+				infospread[1] << g;
+				infospread[2] << g;
 			}
 			for (int nPop = 0; nPop < nPopulations; ++nPop) {
 
@@ -231,6 +267,12 @@ int main()
 					//Output
 					cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdevMean << "\t" << info << "\t" << stdevInfo;
 					ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdevMean << "\t" << info << "\t" << stdevInfo;
+					for (int i = 0; i < n; ++i) {
+						spread[nPop] << "\t" << Populations[nPop][i].strategy;
+						infospread[nPop] << "\t" << Populations[nPop][i].info;
+					}
+					spread[nPop] << "\n";
+					infospread[nPop] << "\n";
 				}
 			}
 			if (g % nGenSav == 0) {

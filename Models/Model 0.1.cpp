@@ -74,7 +74,7 @@ int main()
 				Populations[nPop][i].fitness = 0.0;
 				Populations[nPop][i].strategy = Pc[nPop];
 				mean += Populations[nPop][i].strategy;
-				spread[nPop] << '\t' << Populations[nPop][i].strategy;
+				spread[nPop] << "\t" << Populations[nPop][i].strategy;
 			}
 			mean /= n;
 			double stdev = 0.0;

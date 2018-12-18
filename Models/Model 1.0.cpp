@@ -59,8 +59,14 @@ int main()
 
 		//Initialise population
 		vector<vector<Individual> > Populations(nPopulations, vector<Individual>(n));
-		cout << "0";
-		ofs << "0";
+		cout << "Generation";
+		ofs << "Generation";
+		for (int nPop = 0; nPop < nPopulations; ++nPop) {
+			cout << "\tPmean\tMeanP0\tStdevP0\tMeanInfo";
+			ofs << "\tPmean\tMeanP0\tStdevP0\tMeanInfo";
+		}
+		cout << "\n0";
+		ofs << "\n0";
 		spread[0] << "0";
 		spread[1] << "0";
 		spread[2] << "0";
@@ -72,7 +78,7 @@ int main()
 				Populations[nPop][i].info = i < n * Pi[nPop] ? 1 : 0;
 				mean += Populations[nPop][i].strategy;
 				info += Populations[nPop][i].info;
-				spread[nPop] << '\t' << Populations[nPop][i].strategy;
+				spread[nPop] << "\t" << Populations[nPop][i].strategy;
 			}
 			mean /= n;
 			info /= n;
@@ -194,7 +200,7 @@ int main()
 					cout << "\t" << coop << "\t" << mean << "\t" << stdev << "\t" << info;
 					ofs << "\t" << coop << "\t" << mean << "\t" << stdev << "\t" << info;
 					for (int i = 0; i < n; ++i) {
-						spread[nPop] << '\t' << Populations[nPop][i].strategy ;
+						spread[nPop] << "\t" << Populations[nPop][i].strategy ;
 					}
 					spread[nPop] << "\n";
 				}
