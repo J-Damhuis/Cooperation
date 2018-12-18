@@ -11,14 +11,14 @@ const double b = 4.0;							//Benefits
 const double c = 2.0;							//Costs
 const double mu = 0.01;							//Mutation rate
 const double sigma = 0.01;						//Stdev of change after mutation
-const double price = 0.1;						//Costs for obtaining information
+const double price = 0.001;						//Costs for obtaining information
 const int n = 1000;								//Population size
 const int nPopulations = 3;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
-const int nGenerations = 100;					//Number of generations
-const int nGenSav = 1;							//Save every n generations
-const vector<double> Pc = { 0.95, 0.05, 0.67 };	//Initial mean tendency of populations to cooperate
-const vector<double> Pi = { 0.5, 0.5, 0.5 };	//Initial fraction of population which obtains information
+const int nGenerations = 100;				//Number of generations
+const int nGenSav = 1;						//Save every n generations
+const vector<double> Pc = { 0.67, 0.67, 0.67 };	//Initial mean tendency of populations to cooperate
+const vector<double> Pi = { 0.0, 0.0, 0.0 };	//Initial fraction of population which obtains information
 
 mt19937_64 rng;
 
