@@ -15,8 +15,8 @@ const double price = 0.001;						//Costs for obtaining information
 const int n = 1000;								//Population size
 const int nPopulations = 3;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
-const int nGenerations = 100;				//Number of generations
-const int nGenSav = 1;						//Save every n generations
+const int nGenerations = 500;					//Number of generations
+const int nGenSav = 1;							//Save every n generations
 const vector<double> Pc = { 0.67, 0.67, 0.67 };	//Initial mean tendency of populations to cooperate
 const vector<double> Pi = { 0.0, 0.0, 0.0 };	//Initial fraction of population which obtains information
 
@@ -70,25 +70,30 @@ int main()
 		spread[0] << "0";
 		spread[1] << "0";
 		spread[2] << "0";
-		vector<double> pmean(nPopulations);
+		vector<double> pmean = Pc;
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0, info = 0.0;
+			int unresponsive = 0;
 			for (int i = 0; i < n; ++i) {
 				Populations[nPop][i].fitness = 0.0;
 				Populations[nPop][i].strategy = Pc[nPop];
 				Populations[nPop][i].info = i < n * Pi[nPop] ? 1 : 0;
-				mean += Populations[nPop][i].strategy;
+				if (Populations[nPop][i].info == 0) {
+					mean += Populations[nPop][i].strategy;
+					++unresponsive;
+				}
 				info += Populations[nPop][i].info;
 				spread[nPop] << "\t" << Populations[nPop][i].strategy;
 			}
-			mean /= n;
-			pmean[nPop] = mean;
+			mean /= unresponsive;
 			info /= n;
 			double stdev = 0.0;
 			for (int i = 0; i < n; ++i) {
-				stdev += pow(Populations[nPop][i].strategy - mean, 2);
+				if (Populations[nPop][i].info == 0) {
+					stdev += pow(Populations[nPop][i].strategy - mean, 2);
+				}
 			}
-			stdev = sqrt(stdev / n);
+			stdev = sqrt(stdev / unresponsive);
 			cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
 			ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
 		}
@@ -220,19 +225,25 @@ int main()
 				if (g % nGenSav == 0) {
 					//Calculate means
 					double mean = 0.0, info = 0.0;
+					int unresponsive = 0;
 					for (int i = 0; i < n; ++i) {
-						mean += Populations[nPop][i].strategy;
+						if (Populations[nPop][i].info == 0) {
+							mean += Populations[nPop][i].strategy;
+							++unresponsive;
+						}
 						info += Populations[nPop][i].info;
 					}
-					mean /= n;
+					mean /= unresponsive;
 					info /= n;
 
 					//Calculate stdev of Pc
 					double stdev = 0.0;
 					for (int i = 0; i < n; ++i) {
-						stdev += pow(Populations[nPop][i].strategy - mean, 2);
+						if (Populations[nPop][i].info == 0) {
+							stdev += pow(Populations[nPop][i].strategy - mean, 2);
+						}
 					}
-					stdev = sqrt(stdev / n);
+					stdev = sqrt(stdev / unresponsive);
 
 					//Output
 					cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
