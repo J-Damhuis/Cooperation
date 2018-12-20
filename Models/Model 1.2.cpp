@@ -159,19 +159,19 @@ int main()
 								}
 							}
 							else if (Populations[nPop][j].info > q) {												//If partner does obtain info
-								if (pmean[nPop] > r && Populations[nPop][j].strategy > s) {								//Both cooperate
-									Populations[nPop][i].fitness += b - c / 2.0;
-									coop += 1.0;
+								if (pmean[nPop] > r && pmean[nPop] > s) {											//Both defect
+									Populations[nPop][i].fitness += 0.0;
 								}
-								else if (pmean[nPop] > r && Populations[nPop][j].strategy < s) {							//Only focal individual cooperates
+								else if (pmean[nPop] > r && pmean[nPop] < s) {										//Only focal individual defects
+									Populations[nPop][i].fitness += b;
+								}
+								else if (pmean[nPop] < r && pmean[nPop] > s) {										//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 								}
-								else if (pmean[nPop] < r && Populations[nPop][j].strategy > s) {							//Only focal individual defects
-									Populations[nPop][i].fitness += b;
-								}
-								else if (pmean[nPop] < r && Populations[nPop][j].strategy < s) {							//Both defect
-									Populations[nPop][i].fitness += 0.0;
+								else if (pmean[nPop] < r && pmean[nPop] < s) {										//Both cooperate
+									Populations[nPop][i].fitness += b - c / 2.0;
+									coop += 1.0;
 								}
 							}
 						}
@@ -197,12 +197,12 @@ int main()
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 								}
-								else if (Populations[nPop][i].info > r && Populations[nPop][i].info < s) {			//Both defect
-									Populations[nPop][i].fitness += 0.0;
-								}
-								else if (Populations[nPop][i].info < r && Populations[nPop][i].info > s) {			//Both cooperate
+								else if (Populations[nPop][i].info > r && Populations[nPop][i].info < s) {			//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
+								}
+								else if (Populations[nPop][i].info < r && Populations[nPop][i].info > s) {			//Both defect
+									Populations[nPop][i].fitness += 0.0;
 								}
 								else if (Populations[nPop][i].info < r && Populations[nPop][i].info < s) {			//Only focal individual defects
 									Populations[nPop][i].fitness += b;

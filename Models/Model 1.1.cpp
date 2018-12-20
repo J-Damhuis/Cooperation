@@ -13,12 +13,12 @@ const double mu = 0.01;							//Mutation rate
 const double sigma = 0.01;						//Stdev of change after mutation
 const double price = 0.001;						//Costs for obtaining information
 const int n = 1000;								//Population size
-const int nPopulations = 3;						//Number of populations
+const int nPopulations = 1;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
 const int nGenerations = 500;					//Number of generations
 const int nGenSav = 1;							//Save every n generations
-const vector<double> Pc = { 0.67, 0.67, 0.67 };	//Initial mean tendency of populations to cooperate
-const vector<double> Pi = { 0.0, 0.0, 0.0 };	//Initial fraction of population which obtains information
+const vector<double> Pc = { 0.1 };				//Initial mean tendency of populations to cooperate
+const vector<double> Pi = { 0.0 };				//Initial fraction of population which obtains information
 
 mt19937_64 rng;
 
@@ -36,7 +36,7 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 1.1.csv");
+		ofstream ofs("Model 1.1 nul.csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
 		}
@@ -142,19 +142,19 @@ int main()
 								}
 							}
 							else if (Populations[nPop][j].info == 1) {												//If partner does obtain info
-								if (pmean[nPop] > r && pmean[nPop] > s) {											//Both cooperate
-									Populations[nPop][i].fitness += b - c / 2.0;
-									coop += 1.0;
+								if (pmean[nPop] > r && pmean[nPop] > s) {											//Both defect
+									Populations[nPop][i].fitness += 0.0;
 								}
-								else if (pmean[nPop] > r && pmean[nPop] < s) {										//Only focal individual cooperates
+								else if (pmean[nPop] > r && pmean[nPop] < s) {										//Only focal individual defects
+									Populations[nPop][i].fitness += b;
+								}
+								else if (pmean[nPop] < r && pmean[nPop] > s) {										//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 								}
-								else if (pmean[nPop] < r && pmean[nPop] > s) {										//Only focal individual defects
-									Populations[nPop][i].fitness += b;
-								}
-								else if (pmean[nPop] < r && pmean[nPop] < s) {										//Both defect
-									Populations[nPop][i].fitness += 0.0;
+								else if (pmean[nPop] < r && pmean[nPop] < s) {										//Both cooperate
+									Populations[nPop][i].fitness += b - c / 2.0;
+									coop += 1.0;
 								}
 							}
 						}
@@ -176,18 +176,18 @@ int main()
 								}
 							}
 							else if (Populations[nPop][j].info == 1) {												//If partner obtains info
-								if (Populations[nPop][i].info > r && Populations[nPop][i].info > s) {				//Only focal individual cooperates
+								if (Populations[nPop][i].strategy > r && Populations[nPop][i].strategy > s) {		//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 								}
-								else if (Populations[nPop][i].info > r && Populations[nPop][i].info < s) {			//Both defect
-									Populations[nPop][i].fitness += 0.0;
-								}
-								else if (Populations[nPop][i].info < r && Populations[nPop][i].info > s) {			//Both cooperate
+								else if (Populations[nPop][i].strategy > r && Populations[nPop][i].strategy < s) {	//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
 								}
-								else if (Populations[nPop][i].info < r && Populations[nPop][i].info < s) {			//Only focal individual defects
+								else if (Populations[nPop][i].strategy < r && Populations[nPop][i].strategy > s) {	//Both defect
+									Populations[nPop][i].fitness += 0.0;
+								}
+								else if (Populations[nPop][i].strategy < r && Populations[nPop][i].strategy < s) {	//Only focal individual defects
 									Populations[nPop][i].fitness += b;
 								}
 							}
@@ -202,9 +202,9 @@ int main()
 					vecWeights[i] = Populations[nPop][i].fitness < 0.0 ? 0.0 : Populations[nPop][i].fitness;
 				}
 				vector<Individual> PopulationNew(n);
-				discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
+				//discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
 				for (int i = 0; i < n; ++i) {
-					PopulationNew[i] = Populations[nPop][chooseParent(rng)];
+					PopulationNew[i] = Populations[nPop][pickPartner(rng)];
 					PopulationNew[i].fitness = 0.0;
 					if (chooseFraction(rng) < mu) {
 						normal_distribution<double> defineMutation(0.0, sigma);

@@ -116,16 +116,16 @@ int main()
 						int j = pickPartner(rng);
 						double r = chooseFraction(rng);
 						double s = chooseFraction(rng);
-						if (Populations[nPop][i].info) {														//If focal individual obtains info
+						if (Populations[nPop][i].info == 1) {														//If focal individual obtains info
 							Populations[nPop][i].fitness -= price;
 							if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy > s) {		//Only focal individual defects
 								Populations[nPop][i].fitness += b;
 							}
 							else if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy < s) {	//Both defect
-								Populations[nPop][i].fitness += 0;
+								Populations[nPop][i].fitness += 0.0;
 							}
 							else if (Populations[nPop][j].strategy < r && Populations[nPop][j].strategy > s) {	//Both cooperate
-								Populations[nPop][i].fitness += b - c / 2;
+								Populations[nPop][i].fitness += b - c / 2.0;
 								coop += 1.0;
 							}
 							else if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy > s) {	//Only focal individual cooperates
@@ -133,9 +133,9 @@ int main()
 								coop += 1.0;
 							}
 						}
-						else {																					//If focal individual does not obtain info
+						else if (Populations[nPop][i].info == 0) {																					//If focal individual does not obtain info
 							if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy > s) {		//Both cooperate
-								Populations[nPop][i].fitness += b - c / 2;
+								Populations[nPop][i].fitness += b - c / 2.0;
 								coop += 1.0;
 							}
 							else if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy < s) {	//Only focal individual cooperates
@@ -146,7 +146,7 @@ int main()
 								Populations[nPop][i].fitness += b;
 							}
 							else if (Populations[nPop][i].strategy < r && Populations[nPop][j].strategy < s) {	//Both defect
-								Populations[nPop][i].fitness += 0;
+								Populations[nPop][i].fitness += 0.0;
 							}
 						}
 					}
