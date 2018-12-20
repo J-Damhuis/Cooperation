@@ -15,10 +15,10 @@ const double price = 0.1;						//Costs for obtaining information
 const int n = 1000;								//Population size
 const int nPopulations = 3;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
-const int nGenerations = 100;					//Number of generations
+const int nGenerations = 500;					//Number of generations
 const int nGenSav = 1;							//Save every n generations
 const vector<double> Pc = { 0.95, 0.05, 0.67 };	//Initial mean tendency of populations to cooperate
-const vector<double> Pi = { 0.5, 0.5, 0.5 };	//Initial fraction of population which obtains information
+const vector<double> Pi = { 0.0, 0.0, 0.0 };	//Initial fraction of population which obtains information
 
 mt19937_64 rng;
 
@@ -73,7 +73,7 @@ int main()
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0, info = 0.0;
 			for (int i = 0; i < n; ++i) {
-				Populations[nPop][i].fitness = 0.0;
+				Populations[nPop][i].fitness = (nInteractions + 1) * price;
 				Populations[nPop][i].strategy = Pc[nPop];
 				Populations[nPop][i].info = i < n * Pi[nPop] ? 1 : 0;
 				mean += Populations[nPop][i].strategy;
@@ -156,13 +156,13 @@ int main()
 				//Determine offspring
 				vector<double> vecWeights(n);
 				for (int i = 0; i < n; ++i) {
-					vecWeights[i] = Populations[nPop][i].fitness < 0.0 ? 0.0 : Populations[nPop][i].fitness;
+					vecWeights[i] = Populations[nPop][i].fitness;
 				}
 				vector<Individual> PopulationNew(n);
 				discrete_distribution<int> chooseParent(vecWeights.begin(), vecWeights.end());
 				for (int i = 0; i < n; ++i) {
 					PopulationNew[i] = Populations[nPop][chooseParent(rng)];
-					PopulationNew[i].fitness = 0.0;
+					PopulationNew[i].fitness = (nInteractions + 1) * price;
 					if (chooseFraction(rng) < mu) {
 						normal_distribution<double> defineMutation(0.0, sigma);
 						PopulationNew[i].strategy += defineMutation(rng);
