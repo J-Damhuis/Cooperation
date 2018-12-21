@@ -1,10 +1,11 @@
-setwd("C:/Users/FSE-Education/Cooperation/Data")
+setwd("C:/Users/joris/GitHubs/Cooperation/Data/Spread csv files")
 
 library(ggplot2)
 
-filename <- "spread_graph_0.67.csv"
+filename <- "spread_model1.0_0.67.csv"
 
 d <- read.csv(file = filename, header = FALSE, sep = "\t")
+d <- d[1:101,]
 
 p <- ggplot(data = d, aes(x = d$V1))
 
@@ -15,9 +16,8 @@ for (i in 2:length(d[,1])) {
 }
 p + ylim(0.0, 1.0) + ggtitle(filename)
 
-d2 <- d[101,]
-d2 <- as.data.frame(t(d2))
-d2 <- as.data.frame(d2[-1,])
+d2 <- d[length(d[,1]),]
+d2 <- as.data.frame(t(d2)[-1,])
 colnames(d2) <- "value"
 
 ggplot(d2, aes(x = value)) + geom_histogram(bins = 100) + ggtitle(filename)
