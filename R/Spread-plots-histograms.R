@@ -1,8 +1,8 @@
-setwd("C:/Users/joris/GitHubs/Cooperation/Data/Spread csv files")
+setwd("C:/Users/annad/Cooperation/Data/Spread_csv_files")
 
 library(ggplot2)
 
-filename <- "spread_model1.0_0.67.csv"
+filename <- "spread_model1.2_0.67.csv"
 
 d <- read.csv(file = filename, header = FALSE, sep = "\t")
 d <- d[1:101,]
