@@ -13,12 +13,12 @@ const double mu = 0.01;							//Mutation rate
 const double sigma = 0.01;						//Stdev of change after mutation
 const double price = 0.001;						//Costs for obtaining information
 const int n = 1000;								//Population size
-const int nPopulations = 3;						//Number of populations
+const int nPopulations = 1;						//Number of populations
 const int nInteractions = 10;					//Number of interactions in individual's life
-const int nGenerations = 500;					//Number of generations
+const int nGenerations = 100;					//Number of generations
 const int nGenSav = 1;							//Save every n generations
-const vector<double> Pc = { 0.95, 0.05, 0.67 };	//Initial mean tendency of populations to cooperate
-const vector<double> Pi = { 0.0, 0.0, 0.0 };	//Initial fraction of population which obtains information
+const vector<double> Pc = { 0.05 };				//Initial mean tendency of populations to cooperate
+const vector<double> Pi = { 0.0 };				//Initial fraction of population which obtains information
 
 mt19937_64 rng;
 
@@ -36,7 +36,7 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 1.1 nul.csv");
+		ofstream ofs("Model 1.1 new test.csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
 		}
@@ -62,8 +62,8 @@ int main()
 		cout << "Generation";
 		ofs << "Generation";
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
-			cout << "\tPmean\tMeanP0\tStdevP0\tMeanInfo";
-			ofs << "\tPmean\tMeanP0\tStdevP0\tMeanInfo";
+			cout << "\tPmean\tPmeanRes\tPmeanUnres\tMeanP0\tStdevP0\tMeanInfo";
+			ofs << "\tPmean\tPmeanRes\tPmeanUnres\tMeanP0\tStdevP0\tMeanInfo";
 		}
 		cout << "\n0";
 		ofs << "\n0";
@@ -94,8 +94,8 @@ int main()
 				}
 			}
 			stdev = sqrt(stdev / unresponsive);
-			cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
-			ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
+			cout << "\t" << pmean[nPop] << "\t" << pmean[nPop] * info << "\t" << pmean[nPop] * (1 - info) << "\t" << mean << "\t" << stdev << "\t" << info;
+			ofs << "\t" << pmean[nPop] << "\t" << pmean[nPop] * info << "\t" << pmean[nPop] * (1 - info) << "\t" << mean << "\t" << stdev << "\t" << info;
 		}
 		cout << "\n";
 		ofs << "\n";
@@ -117,7 +117,11 @@ int main()
 			for (int nPop = 0; nPop < nPopulations; ++nPop) {
 
 				//Interactions
-				double coop = 0.0;
+				double coop = 0.0;		 
+				double coopres = 0.0;		 
+				double coopunres = 0.0;	
+				double res = 0.0;
+				double unres = 0.0;
 				for (int i = 0; i < n; ++i) {
 					for (int k = 0; k < nInteractions; ++k) {
 						int j = pickPartner(rng);
@@ -125,6 +129,7 @@ int main()
 						double s = chooseFraction(rng);
 						if (Populations[nPop][i].info == 1) {														//If focal individual obtains info
 							Populations[nPop][i].fitness -= price;
+							res += 1.0;
 							if (Populations[nPop][j].info == 0) {													//If partner does not obtain info
 								if (Populations[nPop][j].strategy > r && Populations[nPop][j].strategy > s) {		//Only focal individual defects
 									Populations[nPop][i].fitness += b;
@@ -134,11 +139,13 @@ int main()
 								}
 								else if (Populations[nPop][j].strategy < r && Populations[nPop][j].strategy > s) {	//Both cooperate
 									coop += 1.0;
+									coopres += 1.0;
 									Populations[nPop][i].fitness += b - c / 2.0;
 								}
 								else if (Populations[nPop][j].strategy < r && Populations[nPop][j].strategy < s) {	//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
+									coopres += 1.0;
 								}
 							}
 							else if (Populations[nPop][j].info == 1) {												//If partner does obtain info
@@ -151,22 +158,27 @@ int main()
 								else if (pmean[nPop] < r && pmean[nPop] > s) {										//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
+									coopres += 1.0;
 								}
 								else if (pmean[nPop] < r && pmean[nPop] < s) {										//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
+									coopres += 1.0;
 								}
 							}
 						}
 						else if (Populations[nPop][i].info == 0) {						 							//If focal individual does not obtain info
+							unres += 1.0;
 							if (Populations[nPop][j].info == 0) {													//If partner does not obtain info
 								if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy > s) {		//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
+									coopunres += 1.0;
 								}
 								else if (Populations[nPop][i].strategy > r && Populations[nPop][j].strategy < s) {	//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
+									coopunres += 1.0;
 								}
 								else if (Populations[nPop][i].strategy < r && Populations[nPop][j].strategy > s) {	//Only focal individual defects
 									Populations[nPop][i].fitness += b;
@@ -179,10 +191,12 @@ int main()
 								if (Populations[nPop][i].strategy > r && Populations[nPop][i].strategy > s) {		//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
+									coopunres += 1.0;
 								}
 								else if (Populations[nPop][i].strategy > r && Populations[nPop][i].strategy < s) {	//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
+									coopunres += 1.0;
 								}
 								else if (Populations[nPop][i].strategy < r && Populations[nPop][i].strategy > s) {	//Both defect
 									Populations[nPop][i].fitness += 0.0;
@@ -195,6 +209,9 @@ int main()
 					}
 				}
 				pmean[nPop] = coop / (nInteractions * n);
+				double pmres = coopres / res;
+				double pmunres = coopunres / unres;
+
 
 				//Determine offspring
 				vector<double> vecWeights(n);
@@ -246,8 +263,8 @@ int main()
 					stdev = sqrt(stdev / unresponsive);
 
 					//Output
-					cout << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
-					ofs << "\t" << pmean[nPop] << "\t" << mean << "\t" << stdev << "\t" << info;
+					cout << "\t" << pmean[nPop] << "\t" << pmres << "\t" << pmunres << "\t" << mean << "\t"<< stdev << "\t" << info;
+					ofs << "\t" << pmean[nPop] << "\t"  << pmres << "\t" << pmunres << "\t" << mean << "\t" << stdev << "\t" << info;
 					for (int i = 0; i < n; ++i) {
 						spread[nPop] << "\t" << Populations[nPop][i].strategy;
 					}
