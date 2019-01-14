@@ -36,17 +36,9 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 1.1 new test.csv");
+		ofstream ofs("Model 1.1 price0.0.csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
-		}
-		ofstream spread1("spread_model1.1_0.95.csv"), spread2("spread_model1.1_0.05.csv"), spread3("spread_model1.1_0.67.csv");
-		vector<ofstream> spread;
-		spread.push_back(move(spread1));
-		spread.push_back(move(spread2));
-		spread.push_back(move(spread3));
-		if (!spread[0].is_open() || !spread[1].is_open() || !spread[2].is_open()) {
-			throw logic_error("Unable to open one of the spread file \n");
 		}
 
 		//More checks
@@ -67,9 +59,6 @@ int main()
 		}
 		cout << "\n0";
 		ofs << "\n0";
-		spread[0] << "0";
-		spread[1] << "0";
-		spread[2] << "0";
 		vector<double> pmean = Pc;
 		for (int nPop = 0; nPop < nPopulations; ++nPop) {
 			double mean = 0.0, info = 0.0;
@@ -83,7 +72,6 @@ int main()
 					++unresponsive;
 				}
 				info += Populations[nPop][i].info;
-				spread[nPop] << "\t" << Populations[nPop][i].strategy;
 			}
 			mean /= unresponsive;
 			info /= n;
@@ -99,9 +87,6 @@ int main()
 		}
 		cout << "\n";
 		ofs << "\n";
-		spread[0] << "\n";
-		spread[1] << "\n";
-		spread[2] << "\n";
 
 		//Simulate
 		uniform_real_distribution<double> chooseFraction(0.0, 1.0);
@@ -110,9 +95,6 @@ int main()
 			if (g % nGenSav == 0) {
 				cout << g;
 				ofs << g;
-				spread[0] << g;
-				spread[1] << g;
-				spread[2] << g;
 			}
 			for (int nPop = 0; nPop < nPopulations; ++nPop) {
 
@@ -233,7 +215,7 @@ int main()
 							PopulationNew[i].strategy = 1.0;
 						}
 					}
-					if (chooseFraction(rng) < mu) {
+					if (chooseFraction(rng) < mu && g > 100000) {
 						PopulationNew[i].info = PopulationNew[i].info == 1 ? 0 : 1;
 					}
 				}
@@ -265,10 +247,6 @@ int main()
 					//Output
 					cout << "\t" << pmean[nPop] << "\t" << pmres << "\t" << pmunres << "\t" << mean << "\t"<< stdev << "\t" << info;
 					ofs << "\t" << pmean[nPop] << "\t"  << pmres << "\t" << pmunres << "\t" << mean << "\t" << stdev << "\t" << info;
-					for (int i = 0; i < n; ++i) {
-						spread[nPop] << "\t" << Populations[nPop][i].strategy;
-					}
-					spread[nPop] << "\n";
 				}
 			}
 			if (g % nGenSav == 0) {
