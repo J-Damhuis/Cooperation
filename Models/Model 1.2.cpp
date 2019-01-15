@@ -35,7 +35,7 @@ int main()
 		rng.seed(1);
 
 		//Open output file
-		ofstream ofs("Model 1.2 test.csv");
+		ofstream ofs("Model 1.2 full.csv");
 		if (!ofs.is_open()) {
 			throw logic_error("Unable to open output file\n");
 		}
@@ -65,7 +65,7 @@ int main()
 			for (int i = 0; i < n; ++i) {
 				Populations[nPop][i].fitness = (nInteractions + 1) * price;
 				Populations[nPop][i].strategy = Pc[nPop];
-				Populations[nPop][i].info = chooseFraction(rng);
+				Populations[nPop][i].info = Pi[nPop];
 				mean += Populations[nPop][i].strategy;
 				info += Populations[nPop][i].info;
 			}
@@ -167,20 +167,20 @@ int main()
 								}
 							}
 							else if (Populations[nPop][j].info > q) {												//If partner obtains info
-								if (Populations[nPop][i].info > r && Populations[nPop][i].info > s) {				//Only focal individual cooperates
+								if (Populations[nPop][i].strategy > r && Populations[nPop][i].strategy > s) {				//Only focal individual cooperates
 									Populations[nPop][i].fitness += b - c;
 									coop += 1.0;
 									coopunres += 1.0;
 								}
-								else if (Populations[nPop][i].info > r && Populations[nPop][i].info < s) {			//Both cooperate
+								else if (Populations[nPop][i].strategy > r && Populations[nPop][i].strategy < s) {			//Both cooperate
 									Populations[nPop][i].fitness += b - c / 2.0;
 									coop += 1.0;
 									coopunres += 1.0;
 								}
-								else if (Populations[nPop][i].info < r && Populations[nPop][i].info > s) {			//Both defect
+								else if (Populations[nPop][i].strategy < r && Populations[nPop][i].strategy > s) {			//Both defect
 									Populations[nPop][i].fitness += 0.0;
 								}
-								else if (Populations[nPop][i].info < r && Populations[nPop][i].info < s) {			//Only focal individual defects
+								else if (Populations[nPop][i].strategy < r && Populations[nPop][i].strategy < s) {			//Only focal individual defects
 									Populations[nPop][i].fitness += b;
 								}
 							}
